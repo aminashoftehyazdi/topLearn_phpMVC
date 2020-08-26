@@ -1,38 +1,47 @@
 <?php
-	class MysqlQueryBuilder {
-		protected $query;
-		protected function reset() 	{
-			$this->query = new \stdClass;
+	// this sample of builder design pattern create a string that compatible with SQL syntax from user values
+	// for example create "SELECT name, family FROM users WHERE name = 'amin' AND age > 14"
+	// with this command : 
+	//    echo $obj -> select('users',['name','family'])->where('name','amin')->where('age',14,'>')->getSQL();
+	class MYSQLBUILDER {
+		public $query;
+		public function reset(){
+			$this -> query = new stdclass;
 		}
-		public function select(string $table, array $fields) {
+		public function select($table,$fields = ['*']){
 			$this->reset();
-			$this->query->base = "SELECT ". implode(", ", $fields) . " FROM " . $table;
-			//print_r($this->query->base);
-			$this->query->type = 'select';
+			$this->query->type = "select";
+			$this->query->base = "SELECT " . implode(', ', $fields) . " FROM " . $table;
 			return $this;
 		}
-		public function where(string $field, string $value, string $operator = '=') {
-			if (!in_array($this->query->type, ['select', 'update', 'delete'])){
-				return false;
-			}
-			$this->query->where[] = "$field $operator '$value'";
+		// INSERT INTO users () VALUES ();
+		public function insert($table,$fields,$values){
+			$this->reset();
+			$this->query->type = "insert";
+			$this->query->base = "INSERT INTO " . $table . " ( " . implode(", ",$fields) .
+			" ) VALUES ( " . implode(", ",$values) . " )";
 			return $this;
 		}
-		public function getSQL(){
-			$query = $this->query;
-			$sql = $query->base;
-			if(!empty($query->where)){
-				$sql .= " WHERE " . implode(' AND ', $query->where);
+		public function where ($field,$value,$operand = "=") {
+			if(!in_array($this->query->type, ['select','delete','update'])){
+				echo "WHERE section not applied for this type of SQL ( " . $this -> query -> type . " ) <br>"  ;
+				return $this;
 			}
-			$sql .= ";";
-			return $sql;
+			$this->query->where[] = " $field $operand $value "; 
+			return $this;
+		}
+		public function getSQL (){
+			$query = $this->query->base;
+			if(!empty($this->query->where)){
+				$query .= " WHERE " . implode(" AND ", $this->query->where) . " ;";
+			}
+			return $query;			
 		}
 	}
-	function clientCode(MysqlQueryBuilder $queryBuilder){
-		// $query = $queryBuilder->select('users', ['email', 'username'])->getSQL();
-		// $query = $queryBuilder->select('users', ['email'])->where("id", 1, ">")->getSQL();
-		$query = $queryBuilder->select('users', ['email'])->where('id', 1)->getSQL();
-        echo $query;
-	}
-	clientCode(new MysqlQueryBuilder);
-?>
+	$obj = new MYSQLBUILDER;
+	echo $obj -> select('users')->where('name','amin')->where('age',14,'>')->getSQL();
+	echo "<hr>";
+	echo $obj ->insert('users', ['name','family','age'], ['behrang','raadmanesh',12] )->where('id',10)->getSQL();
+	echo "<hr>";
+	echo $obj ->insert('users',['name','family','age'],['behrang','raadmanesh',12])->getSQL();
+?>		

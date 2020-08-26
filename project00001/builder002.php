@@ -30,8 +30,8 @@
 	}
 	function clientCode(MysqlQueryBuilder $queryBuilder){
 		// $query = $queryBuilder->select('users', ['email', 'username'])->getSQL();
-		// $query = $queryBuilder->select('users', ['email'])->where("id", 1, ">")->getSQL();
-		$query = $queryBuilder->select('users', ['email'])->where('id', 1)->getSQL();
+		$query = $queryBuilder->select('users', ['email'])->where("id", 1, ">")->getSQL();
+		//$query = $queryBuilder->select('users', ['email'])->where('id', 1)->getSQL();
         echo $query;
 	}
 	clientCode(new MysqlQueryBuilder);

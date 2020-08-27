@@ -13,6 +13,4 @@
 	'put' => [],
 	'delete' => [],
 	];
-	
-	print_r($routes);
 ?>
